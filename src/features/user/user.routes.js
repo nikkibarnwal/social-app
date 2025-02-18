@@ -11,6 +11,7 @@ import {
 } from "../../utils/apiUrl.js";
 import validateUser from "./userValidation.middleware.js";
 import jwtAuthMiddleware from "../../middlewares/jwtAuth.middleware.js";
+import fileUpload from "../../middlewares/fileUpload.middleware.js";
 
 const userRouter = express.Router();
 
@@ -31,6 +32,7 @@ userRouter.get(
 );
 userRouter.put(
   UPDATE_USER_DETAIL_URL,
+  fileUpload.single("avtar"), //file name
   jwtAuthMiddleware,
   userController.updateUser
 );

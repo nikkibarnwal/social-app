@@ -34,7 +34,8 @@ export const getUser = async (data, passwordRequired = false) => {
     //e.g. { email:email }
     const foundUser = await User.findOne(data);
     if (!passwordRequired) {
-      const { password, ...userWithoutPassword } = foundUser.toObject();
+      const { password, loginToken, ...userWithoutPassword } =
+        foundUser.toObject();
       return userWithoutPassword;
     }
     return foundUser;
@@ -63,25 +64,29 @@ export const updateUserById = async (userId, updateData) => {
     const existingUser = await User.findById(userId);
     if (!existingUser) {
       throw new ApplicationError("User not found", NOT_FOUND_CODE);
-    } else if (existingUser.email !== updateData.email) {
-      //  Ensure the new email is unique (Check if it's already taken)
-      const emailExists = await User.findOne({ email });
-      if (emailExists) {
-        throw new ApplicationError("Email is already in use", BAD_REQUEST_CODE);
-      }
-    } else {
-      const updatedUser = await User.findOneAndUpdate(
-        { _id: userId },
-        { $set: updateData },
-        {
-          new: true,
-          runValidators: true, // ✅ Ensures validation on update and excludes password
-          context: "query",
-          select: "-password",
-        }
-      );
-      return updatedUser;
     }
+    if (updateData?.email) {
+      if (existingUser.email !== updateData.email) {
+        //  Ensure the new email is unique (Check if it's already taken)
+        const emailExists = await User.findOne({ email: updateData?.email });
+        if (emailExists) {
+          throw new ApplicationError(
+            "Email is already in use",
+            BAD_REQUEST_CODE
+          );
+        }
+      }
+    }
+    const updatedUser = await User.findOneAndUpdate(
+      { _id: userId },
+      { $set: updateData },
+      {
+        new: true,
+        runValidators: true, // ✅ Ensures validation on update
+        context: "query",
+      }
+    ).select("-password -loginToken");
+    return updatedUser;
   } catch (error) {
     if (
       // Handle unique constraint error

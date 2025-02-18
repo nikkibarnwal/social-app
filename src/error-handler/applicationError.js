@@ -1,17 +1,17 @@
 class ApplicationError extends Error {
-  constructor(message, statusCode, logMessage) {
+  constructor(message, statusCode, logMessage = null) {
     super(message);
     this.statusCode = statusCode;
     this.logMessage = logMessage || message;
     Error.captureStackTrace(this, this.constructor);
   }
-  toJSON() {
-    return {
-      message: this.message,
-      statusCode: this.statusCode,
-      logMessage: this.logMessage,
-    };
-  }
+  // toJSON() {
+  //   return {
+  //     message: this.message,
+  //     statusCode: this.statusCode,
+  //     logMessage: this.logMessage,
+  //   };
+  // }
 }
 
 export default ApplicationError;

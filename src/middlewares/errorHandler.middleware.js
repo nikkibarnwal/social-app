@@ -2,31 +2,33 @@ import {
   BAD_REQUEST_CODE,
   INTERNAL_SERVER_ERROR_CODE,
 } from "../config/statusCode.js";
-import { logger } from "./logger.middleware.js";
+import ApplicationError from "../error-handler/applicationError.js";
+import logger, { logError } from "./logger.js";
 
-import ApplicationErrors from "../error-handler/applicationError.js";
-
-const errorHandler = (err, req, res, next) => {
-  if (err instanceof ApplicationErrors) {
-    logger.error(err.logMessage);
-    return res.status(err.statusCode).json({
-      message: err.message, // Send the custom error message to the user
-      success: false,
-    });
-  } else if (err instanceof mongoose.Error.ValidationError) {
-    // if any validation errors occur from mongoose
-    logger.error(err.logMessage);
-    return res.status(BAD_REQUEST_CODE).json({
-      message: err.message, // Send the custom error message to the user
-      success: false,
-    });
+export const errorHandlerMiddleware = (err, req, res, next) => {
+  let statusCode = err.statusCode || INTERNAL_SERVER_ERROR_CODE;
+  let message = err.message || "Internal Server Error";
+  let errors = null;
+  // 🔥 Catch Mongoose Validation Errors
+  if (err.name === "ValidationError") {
+    statusCode = BAD_REQUEST_CODE;
+    errors = Object.keys(err.errors).reduce((acc, key) => {
+      acc[key] = err.errors[key].message;
+      return acc;
+    }, {});
+    message = "Validation Failed";
+  }
+  // 🔥 Handle MongoDB Duplicate Key Error (Unique Email)
+  if (err.code === 11000 && err.keyPattern?.email) {
+    statusCode = BAD_REQUEST_CODE;
+    message = "Email already exists";
+    errors = { email: "This email is already registered" };
   }
 
-  return res.status(INTERNAL_SERVER_ERROR_CODE).json({
-    message: "Oops! Something went wrong... Please try again later!",
+  res.status(statusCode).json({
     success: false,
-    stack: process.env.NODE_ENV === "production" ? null : err.stack,
+    statusCode,
+    message,
+    errors, // Contains field-specific error messages
   });
 };
-
-export default errorHandler;

@@ -1,8 +1,9 @@
 import jwt from "jsonwebtoken";
 import { BAD_REQUEST_CODE, UNAUTHORIZED_CODE } from "../config/statusCode.js";
 import ApplicationError from "../error-handler/applicationError.js";
+import User from "../features/user/user.schema.js";
 
-const jwtAuthMiddleware = (req, res, next) => {
+const jwtAuthMiddleware = async (req, res, next) => {
   let token = req.header("Authorization");
 
   if (!token) {
@@ -14,10 +15,19 @@ const jwtAuthMiddleware = (req, res, next) => {
   try {
     token = token.replace("bearer ", "");
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    req.user = decoded;
+    const haveUser = await User.findOne({ loginToken: { $in: [token] } });
+    if (!haveUser) {
+      return res
+        .status(UNAUTHORIZED_CODE)
+        .send({ success: false, error: "Token expired." });
+    }
+    req.user = { token, ...decoded };
     next();
-  } catch (ex) {
-    throw new ApplicationError("Invalid token.", BAD_REQUEST_CODE, ex.message);
+  } catch (err) {
+    console.log(err.message);
+    return res
+      .status(UNAUTHORIZED_CODE)
+      .send({ success: false, error: "Invalid token." });
   }
 };
 

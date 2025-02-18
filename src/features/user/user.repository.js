@@ -97,3 +97,45 @@ export const updateUserById = async (userId, updateData) => {
     );
   }
 };
+export const addJwtToken = async (id, token) => {
+  try {
+    const updatedUser = await User.findByIdAndUpdate(id, {
+      $push: {
+        loginToken: token,
+      },
+    });
+    if (!updatedUser) {
+      throw new ApplicationError("User not found", NOT_FOUND_CODE);
+    }
+    return updatedUser;
+  } catch (error) {
+    throw new ApplicationError(
+      "Something went wrong",
+      INTERNAL_SERVER_ERROR_CODE,
+      error.message
+    );
+  }
+};
+
+export const removeJwtToken = async (userId, token = null) => {
+  try {
+    const updateQuery = token
+      ? { $pull: { loginToken: token } }
+      : { $set: { loginToken: [] } };
+
+    const updatedUser = await User.findByIdAndUpdate(userId, updateQuery, {
+      new: true,
+    });
+
+    if (!updatedUser) {
+      throw new ApplicationError("User not found", NOT_FOUND_CODE);
+    }
+    return updatedUser;
+  } catch (error) {
+    throw new ApplicationError(
+      "Something went wrong",
+      INTERNAL_SERVER_ERROR_CODE,
+      error.message
+    );
+  }
+};

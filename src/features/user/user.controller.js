@@ -62,6 +62,7 @@ export const login = async (req, res, next) => {
         name: user.name,
         email: user.email,
         gender: user.gender,
+        avtar: user?.avtar,
       };
       // store jwt token in db
       userRepository.addJwtToken(user._id, token);
@@ -145,14 +146,19 @@ export const updateUser = async (req, res, next) => {
   try {
     const { name, email, password, gender } = req.body;
     const { userId } = req.params;
-    const avtar = "";
     const newUser = {
       name,
       email,
       password,
       gender,
-      avtar,
+      avtar: req?.file?.filename,
     };
+    if (!name && !email && !password && !gender && !req?.file?.filename) {
+      throw new ApplicationError(
+        "Atleast one field is required to update",
+        BAD_REQUEST_CODE
+      );
+    }
     const updatedUser = await userRepository.updateUserById(userId, newUser);
 
     res.status(CREATED_CODE).json({

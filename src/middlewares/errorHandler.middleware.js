@@ -2,13 +2,12 @@ import {
   BAD_REQUEST_CODE,
   INTERNAL_SERVER_ERROR_CODE,
 } from "../config/statusCode.js";
-import ApplicationError from "../error-handler/applicationError.js";
-import logger, { logError } from "./logger.js";
 
 export const errorHandlerMiddleware = (err, req, res, next) => {
   let statusCode = err.statusCode || INTERNAL_SERVER_ERROR_CODE;
   let message = err.message || "Internal Server Error";
   let errors = null;
+
   // 🔥 Catch Mongoose Validation Errors
   if (err.name === "ValidationError") {
     statusCode = BAD_REQUEST_CODE;
@@ -27,7 +26,6 @@ export const errorHandlerMiddleware = (err, req, res, next) => {
 
   res.status(statusCode).json({
     success: false,
-    statusCode,
     message,
     errors, // Contains field-specific error messages
   });

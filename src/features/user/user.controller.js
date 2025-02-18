@@ -35,7 +35,7 @@ export const login = async (req, res, next) => {
   try {
     const { email, password } = req.body;
     const user = await userRepository.getUser({ email }, true);
-    console.log("raj---", password, user);
+
     // if user not found, return error response
     if (!user) {
       throw new ApplicationError("Wrong credentials", BAD_REQUEST_CODE);
@@ -63,6 +63,8 @@ export const login = async (req, res, next) => {
         email: user.email,
         gender: user.gender,
       };
+      // store jwt token in db
+      userRepository.addJwtToken(user._id, token);
       res.status(SUCCESS_CODE).json({
         success: true,
         message: "login successfully",
@@ -75,12 +77,31 @@ export const login = async (req, res, next) => {
   }
 };
 
-export const logout = (req, res, next) => {
+export const logout = async (req, res, next) => {
   try {
+    // coming from jwt token
+    const { userid, token } = req.user;
+    await userRepository.removeJwtToken(userid, token);
+
     // Invalidate the token by setting it to an empty string or null
     res.status(SUCCESS_CODE).json({
       success: true,
       message: "Logout successfully",
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+export const logoutAllDevices = async (req, res, next) => {
+  try {
+    // coming from jwt token
+    const { userid } = req.user;
+    await userRepository.removeJwtToken(userid);
+
+    // Invalidate the token by setting it to an empty string or null
+    res.status(SUCCESS_CODE).json({
+      success: true,
+      message: "Successfully logout from all devices",
     });
   } catch (error) {
     next(error);

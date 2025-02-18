@@ -2,6 +2,7 @@ import express from "express";
 import * as userController from "./user.controller.js";
 import {
   ALL_USER_DETAIL_URL,
+  LOGOUT_ALL_DEVICES_URL,
   LOGOUT_URL,
   SIGN_IN_URL,
   SIGN_UP_URL,
@@ -17,6 +18,11 @@ const userRouter = express.Router();
 userRouter.post(SIGN_UP_URL, validateUser, userController.register);
 userRouter.post(SIGN_IN_URL, validateUser, userController.login);
 userRouter.post(LOGOUT_URL, jwtAuthMiddleware, userController.logout);
+userRouter.post(
+  LOGOUT_ALL_DEVICES_URL,
+  jwtAuthMiddleware,
+  userController.logoutAllDevices
+);
 userRouter.get(USER_DETAIL_URL, jwtAuthMiddleware, userController.userDetail);
 userRouter.get(
   ALL_USER_DETAIL_URL,

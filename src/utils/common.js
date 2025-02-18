@@ -1,6 +1,8 @@
+import mongoose from "mongoose";
+import path from "path";
 import { validationResult } from "express-validator";
 import { BAD_REQUEST_CODE } from "../config/statusCode.js";
-import mongoose from "mongoose";
+
 import ApplicationError from "../error-handler/applicationError.js";
 
 const handleApiResponse = (res, statusCode, success, message, data = null) => {
@@ -37,3 +39,5 @@ export const InObjectId = (id) => {
     );
   }
 };
+
+export const imagesPath = path.join(path.resolve(), "uploads");

@@ -4,15 +4,18 @@ import express from "express";
 /* Importing environment variables from env.js file.*/
 import "./env.js";
 
+/* Importing the cors module to enable Cross-Origin Resource Sharing.*/
+import cors from "cors";
+
 /* Importing the connectDB function to connect to MongoDB.*/
 import connectDB from "./src/config/mongodb.js";
 
-/* Importing the cors module to enable Cross-Origin Resource Sharing.*/
-import cors from "cors";
 import invalidRoutesHandlerMiddleware from "./src/middlewares/invalidRoutes.middleware.js";
 import userRouter from "./src/features/user/user.routes.js";
 import { errorHandlerMiddleware } from "./src/middlewares/errorHandler.middleware.js";
 import { logError, requestLogger } from "./src/middlewares/logger.js";
+import postRouter from "./src/features/posts/posts.routes.js";
+import jwtAuthMiddleware from "./src/middlewares/jwtAuth.middleware.js";
 
 /* Creating an instance of an Express application.*/
 const app = express();
@@ -34,6 +37,9 @@ app.get("/", (req, res) => {
 });
 
 app.use("/api/users", userRouter);
+
+// only logged in user can access the posts management
+app.use("/api/posts", jwtAuthMiddleware, postRouter);
 
 app.use(invalidRoutesHandlerMiddleware);
 

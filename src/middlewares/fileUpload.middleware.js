@@ -1,6 +1,8 @@
 import multer from "multer";
 import path from "path";
 import { imagesPath } from "../utils/common.js";
+import ApplicationError from "../error-handler/applicationError.js";
+import { BAD_REQUEST_CODE } from "../config/statusCode.js";
 
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
@@ -19,7 +21,7 @@ const fileFilter = (req, file, cb) => {
   if (mimetype && extname) {
     return cb(null, true);
   } else {
-    cb(new Error("Only images are allowed"));
+    cb(new ApplicationError("Only images are allowed", BAD_REQUEST_CODE));
   }
 };
 

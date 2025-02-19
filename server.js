@@ -16,6 +16,7 @@ import { errorHandlerMiddleware } from "./src/middlewares/errorHandler.middlewar
 import { logError, requestLogger } from "./src/middlewares/logger.js";
 import postRouter from "./src/features/posts/posts.routes.js";
 import jwtAuthMiddleware from "./src/middlewares/jwtAuth.middleware.js";
+import commentsRouter from "./src/features/comment/comment.routes.js";
 
 /* Creating an instance of an Express application.*/
 const app = express();
@@ -39,7 +40,8 @@ app.get("/", (req, res) => {
 app.use("/api/users", userRouter);
 
 // only logged in user can access the posts management
-app.use("/api/posts", jwtAuthMiddleware, postRouter);
+app.use("/api/posts", postRouter);
+app.use("/api/comments", commentsRouter);
 
 app.use(invalidRoutesHandlerMiddleware);
 

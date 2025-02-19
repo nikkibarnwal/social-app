@@ -10,7 +10,11 @@ export const ALL_USER_DETAIL_URL = "/get-all-details";
 export const UPDATE_USER_DETAIL_URL = "/update-details/:userId";
 
 // Posts management urls
-export const POSTS_ALL_URL = "/all";
-export const POSTS_USER_URL = "/user/:userId";
 export const POSTS_BASE_URL = "/";
 export const POSTS_ID_URL = "/:postsId";
+export const POSTS_USER_URL = "/user/:userId";
+export const POSTS_ALL_URL = "/all";
+
+// Comments management urls
+
+export const COMMENTS_ID_URL = "/:commentId";

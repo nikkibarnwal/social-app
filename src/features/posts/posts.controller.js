@@ -37,6 +37,9 @@ export const createPost = async (req, res, next) => {
 export const allPosts = async (req, res, next) => {
   try {
     const posts = await postsRepository.getAll();
+    if (!posts) {
+      throw new ApplicationError("Posts not found", NOT_FOUND_CODE);
+    }
     return res.status(SUCCESS_CODE).json({
       success: true,
       message: "Posts fetched successfully",

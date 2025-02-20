@@ -18,3 +18,7 @@ export const POSTS_ALL_URL = "/all";
 // Comments management urls
 
 export const COMMENTS_ID_URL = "/:commentId";
+
+// Likes management urls
+export const LIKES_TOGGLE_URL = "/toggle/:id/:type";
+export const GET_LIKES_URL = "/:id/:type";

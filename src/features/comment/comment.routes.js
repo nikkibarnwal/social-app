@@ -2,6 +2,7 @@ import express from "express";
 import { COMMENTS_ID_URL, POSTS_ID_URL } from "../../utils/apiUrl.js";
 import * as commentController from "./comment.controller.js";
 import jwtAuthMiddleware from "../../middlewares/jwtAuth.middleware.js";
+import commentValidation from "./commentValidation.middleware.js";
 
 const commentsRouter = express.Router();
 
@@ -11,6 +12,7 @@ commentsRouter.get(POSTS_ID_URL, commentController.getComments);
 commentsRouter.post(
   POSTS_ID_URL,
   jwtAuthMiddleware,
+  commentValidation,
   commentController.addComments
 );
 // Delete Comments
@@ -22,6 +24,7 @@ commentsRouter.delete(
 // Update Comment
 commentsRouter.put(
   COMMENTS_ID_URL,
+  commentValidation,
   jwtAuthMiddleware,
   commentController.updateComment
 );

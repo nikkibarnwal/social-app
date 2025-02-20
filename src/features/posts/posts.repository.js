@@ -4,6 +4,8 @@ import {
 } from "../../config/statusCode.js";
 import ApplicationError from "../../error-handler/applicationError.js";
 import { InObjectId } from "../../utils/common.js";
+import Comments from "../comment/comment.schema.js";
+import Likes from "../like/like.schema.js";
 import Posts from "./posts.schema.js";
 
 export const create = async (postsData) => {
@@ -25,9 +27,24 @@ export const create = async (postsData) => {
 };
 export const getAll = async () => {
   try {
-    return await Posts.find()
+    const posts = await Posts.find()
       .populate("user", "name email _id gender avtar")
       .sort({ updatedAt: -1 });
+    if (posts.length <= 0) {
+      return false;
+    }
+    const postsWithCounts = await Promise.all(
+      posts?.map(async (post) => {
+        const { likeCounts, commentsCounts } = await reactedCounts(post._id);
+        return {
+          ...post.toObject(),
+          likeCounts,
+          commentsCounts,
+        };
+      })
+    );
+
+    return postsWithCounts;
   } catch (error) {
     throw new ApplicationError(
       "Something went wrong",
@@ -39,10 +56,20 @@ export const getAll = async () => {
 
 export const getById = async (postsId) => {
   try {
-    return await Posts.findById(postsId).populate(
+    const post = await Posts.findById(postsId).populate(
       "user",
       "name email _id gender avtar"
     );
+    if (!post) {
+      return false;
+    }
+    const { likeCounts, commentsCounts } = await reactedCounts(postsId);
+
+    return {
+      ...post.toObject(),
+      likeCounts,
+      commentsCounts,
+    };
   } catch (error) {
     throw new ApplicationError(
       "Something went wrong",
@@ -54,9 +81,23 @@ export const getById = async (postsId) => {
 
 export const getByUserId = async (user) => {
   try {
-    return await Posts.find({ user })
+    const posts = await Posts.find({ user })
       .populate("user", "name email _id gender avtar")
       .sort({ updatedAt: -1 });
+    if (posts.length <= 0) {
+      return false;
+    }
+    const postsWithCounts = await Promise.all(
+      posts?.map(async (post) => {
+        const { likeCounts, commentsCounts } = await reactedCounts(post._id);
+        return {
+          ...post.toObject(),
+          likeCounts,
+          commentsCounts,
+        };
+      })
+    );
+    return postsWithCounts;
   } catch (error) {
     throw new ApplicationError(
       "Something went wrong",
@@ -100,6 +141,23 @@ export const updatePosts = async (postsId, userId, caption, imageUrl) => {
       // Handle validation error
       throw error;
     }
+    throw new ApplicationError(
+      "Something went wrong",
+      INTERNAL_SERVER_ERROR_CODE,
+      error.message
+    );
+  }
+};
+
+export const reactedCounts = async (posts) => {
+  try {
+    const likeCounts = await Likes.countDocuments({ posts });
+    const commentsCounts = await Comments.countDocuments({ posts });
+    return {
+      likeCounts,
+      commentsCounts,
+    };
+  } catch (error) {
     throw new ApplicationError(
       "Something went wrong",
       INTERNAL_SERVER_ERROR_CODE,

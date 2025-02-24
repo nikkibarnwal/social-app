@@ -22,3 +22,9 @@ export const COMMENTS_ID_URL = "/:commentId";
 // Likes management urls
 export const LIKES_TOGGLE_URL = "/toggle/:id/:type";
 export const GET_LIKES_URL = "/:id/:type";
+
+// Friendship management urls
+export const GET_FRIENDS_URL = "/get-friends/:userId";
+export const PENDING_REQUEST_URL = "/get-pending-requests";
+export const TOGGLE_FRIENDSHIP_URL = "/toggle-friendship/:friendId";
+export const RESPONSE_TO_REQUEST_URL = "/response-to-request/:friendId";
